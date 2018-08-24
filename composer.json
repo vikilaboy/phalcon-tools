@@ -1,0 +1,15 @@
+{
+  "name": "WebCastle/WebCastle",
+  "description": "WebCastle",
+  "minimum-stability": "dev",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Victor Niculae",
+      "email": "victor@niculae.net"
+    }
+  ],
+  "require": {
+    "phalcon/incubator": "dev-master"
+  }
+}
