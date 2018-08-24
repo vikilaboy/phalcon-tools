@@ -7,7 +7,7 @@ use Phalcon\Paginator\Exception;
 use Phalcon\Db;
 use Phalcon\Paginator\Adapter\QueryBuilder as QueryBuilderP;
 
-class QueryBuilderHaving extends QueryBuilderP
+class QueryBuilder extends QueryBuilderP
 {
     public function getPaginate()
     {
