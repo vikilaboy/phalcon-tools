@@ -9,7 +9,14 @@
       "email": "victor@niculae.net"
     }
   ],
+  "autoload": {
+    "psr-4": {
+      "Vikilaboy\\Phalcon\\": "src/Phalcon/"
+    }
+  },
   "require": {
+    "php": ">=7",
+    "ext-phalcon": "~3.3",
     "phalcon/incubator": "dev-master"
   }
 }
