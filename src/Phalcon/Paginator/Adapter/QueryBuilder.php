@@ -4,15 +4,21 @@ namespace Vikilaboy\Phalcon\Paginator\Adapter;
 
 use Phalcon\Mvc\Model\Query\Builder;
 use Phalcon\Paginator\Exception;
-use Phalcon\Db;
-use Phalcon\Paginator\Adapter\QueryBuilder as QueryBuilderP;
+use Phalcon\Db\Enum;
+use Phalcon\Paginator\Adapter\QueryBuilder as QueryBuilderPhalcon;
+use Phalcon\Paginator\RepositoryInterface;
 
-class QueryBuilder extends QueryBuilderP
+class QueryBuilder extends QueryBuilderPhalcon
 {
-    public function getPaginate()
+    public function __construct(array $config)
     {
-        $originalBuilder = $this->_builder;
-        $columns = $this->_columns;
+        parent::__construct($config);
+    }
+
+    public function paginate(): RepositoryInterface
+    {
+        $originalBuilder = $this->builder;
+        $columns = $this->columns;
 
         /**
          * We make a copy of the original builder to leave it as it is
@@ -25,8 +31,8 @@ class QueryBuilder extends QueryBuilderP
          */
         $totalBuilder = clone $builder;
 
-        $limit = $this->_limitRows;
-        $numberPage = (int) $this->_page;
+        $limit = $this->limitRows;
+        $numberPage = (int)$this->page;
 
         if (!$numberPage) {
             $numberPage = 1;
@@ -46,9 +52,9 @@ class QueryBuilder extends QueryBuilderP
         $query = $builder->getQuery();
 
         if ($numberPage == 1) {
-            $before = 1;
+            $previous = 1;
         } else {
-            $before = $numberPage - 1;
+            $previous = $numberPage - 1;
         }
 
         /**
@@ -89,7 +95,7 @@ class QueryBuilder extends QueryBuilderP
             if (!$hasHaving) {
                 $totalBuilder->groupBy(null)->columns(["COUNT(DISTINCT ".$groupColumn.") AS [rowcount]"]);
             } else {
-                $cols = ["DISTINCT " . $groupColumn];
+                $cols = ["DISTINCT ".$groupColumn];
                 if (!empty($columns)) {
                     $cols[] = $columns;
                 }
@@ -126,7 +132,8 @@ class QueryBuilder extends QueryBuilderP
             $model = new $modelClass();
             $dbService = $model->getReadConnectionService();
             $db = $totalBuilder->getDI()->get($dbService);
-            $row = $db->fetchOne("SELECT COUNT(*) as \"rowcount\" FROM (" .  $sql["sql"] . ") AS T1", Db::FETCH_ASSOC, $sql["bind"]);
+            $row = $db->fetchOne("SELECT COUNT(*) as \"rowcount\" FROM (".$sql["sql"].") AS T1", Enum::FETCH_ASSOC,
+                $sql["bind"]);
             $rowCount = $row ? intval($row["rowcount"]) : 0;
             $totalPages = intval(ceil($rowCount / $limit));
         } else {
@@ -142,17 +149,17 @@ class QueryBuilder extends QueryBuilderP
             $next = $totalPages;
         }
 
-        $page = new \stdClass();
-        $page->items = $items;
-        $page->first = 1;
-        $page->before = $before;
-        $page->current = $numberPage;
-        $page->last = $totalPages;
-        $page->next = $next;
-        $page->total_pages = $totalPages;
-        $page->total_items = $rowCount;
-        $page->limit = $this->_limitRows;
-
-        return $page;
+        return $this->getRepository(
+            [
+                RepositoryInterface::PROPERTY_ITEMS => $items,
+                RepositoryInterface::PROPERTY_TOTAL_ITEMS => $rowCount,
+                RepositoryInterface::PROPERTY_LIMIT => $this->limitRows,
+                RepositoryInterface::PROPERTY_FIRST_PAGE => 1,
+                RepositoryInterface::PROPERTY_PREVIOUS_PAGE => $previous,
+                RepositoryInterface::PROPERTY_CURRENT_PAGE => $numberPage,
+                RepositoryInterface::PROPERTY_NEXT_PAGE => $next,
+                RepositoryInterface::PROPERTY_LAST_PAGE => $totalPages,
+            ]
+        );
     }
 }
