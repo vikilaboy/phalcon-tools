@@ -15,8 +15,8 @@
     }
   },
   "require": {
-    "php": ">=7",
-    "ext-phalcon": "~3.3",
+    "php": ">=7.3",
+    "ext-phalcon": "~4.0",
     "phalcon/incubator": "dev-master"
   }
 }
