@@ -1,6 +1,6 @@
 <?php
 
-namespace Vikilaboy\Phalcon\Paginator\Adapter;
+namespace Colbiocin\Phalcon\Paginator\Adapter;
 
 use Phalcon\Mvc\Model\Query\Builder;
 use Phalcon\Paginator\Exception;
