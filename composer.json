@@ -1,21 +1,21 @@
 {
-  "name": "vikilaboy/phalcon-tools",
+  "name": "colbiocin/phalcon-tools",
   "description": "My PHP Phalcon Framework Tools",
   "minimum-stability": "dev",
   "license": "proprietary",
   "authors": [
     {
-      "name": "Victor Niculae",
-      "email": "victor@niculae.net"
+      "name": "Chirica Mihail Adrian",
+      "email": "chirica_adrian@yahoo.com"
     }
   ],
   "autoload": {
     "psr-4": {
-      "Vikilaboy\\Phalcon\\": "src/Phalcon/"
+      "Colbiocin\\Phalcon\\": "src/Phalcon/"
     }
   },
   "require": {
     "php": ">=7.2",
-    "ext-phalcon": "~4.0"
+    "ext-phalcon": ">=4.0"
   }
 }
