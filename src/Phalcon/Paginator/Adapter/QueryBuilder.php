@@ -4,18 +4,12 @@ namespace Vikilaboy\Phalcon\Paginator\Adapter;
 
 use Phalcon\Mvc\Model\Query\Builder;
 use Phalcon\Paginator\Exception;
-use Phalcon\Db\Enum;
-use Phalcon\Paginator\Adapter\QueryBuilder as QueryBuilderPhalcon;
-use Phalcon\Paginator\RepositoryInterface;
+use Phalcon\Paginator\Adapter\QueryBuilder as QueryBuilderP;
 
-class QueryBuilder extends QueryBuilderPhalcon
+class QueryBuilder extends QueryBuilderP
 {
-    public function __construct(array $config)
-    {
-        parent::__construct($config);
-    }
 
-    public function paginate(): RepositoryInterface
+    public function getPaginate()
     {
         $originalBuilder = $this->builder;
         $columns = $this->columns;
@@ -32,7 +26,7 @@ class QueryBuilder extends QueryBuilderPhalcon
         $totalBuilder = clone $builder;
 
         $limit = $this->limitRows;
-        $numberPage = (int)$this->page;
+        $numberPage = (int) $this->page;
 
         if (!$numberPage) {
             $numberPage = 1;
@@ -52,9 +46,9 @@ class QueryBuilder extends QueryBuilderPhalcon
         $query = $builder->getQuery();
 
         if ($numberPage == 1) {
-            $previous = 1;
+            $before = 1;
         } else {
-            $previous = $numberPage - 1;
+            $before = $numberPage - 1;
         }
 
         /**
@@ -95,7 +89,7 @@ class QueryBuilder extends QueryBuilderPhalcon
             if (!$hasHaving) {
                 $totalBuilder->groupBy(null)->columns(["COUNT(DISTINCT ".$groupColumn.") AS [rowcount]"]);
             } else {
-                $cols = ["DISTINCT ".$groupColumn];
+                $cols = ["DISTINCT " . $groupColumn];
                 if (!empty($columns)) {
                     $cols[] = $columns;
                 }
@@ -132,8 +126,7 @@ class QueryBuilder extends QueryBuilderPhalcon
             $model = new $modelClass();
             $dbService = $model->getReadConnectionService();
             $db = $totalBuilder->getDI()->get($dbService);
-            $row = $db->fetchOne("SELECT COUNT(*) as \"rowcount\" FROM (".$sql["sql"].") AS T1", Enum::FETCH_ASSOC,
-                $sql["bind"]);
+            $row = $db->fetchOne("SELECT COUNT(*) as \"rowcount\" FROM (" .  $sql["sql"] . ") AS T1", \Phalcon\Db\Enum::FETCH_ASSOC, $sql["bind"]);
             $rowCount = $row ? intval($row["rowcount"]) : 0;
             $totalPages = intval(ceil($rowCount / $limit));
         } else {
@@ -149,17 +142,17 @@ class QueryBuilder extends QueryBuilderPhalcon
             $next = $totalPages;
         }
 
-        return $this->getRepository(
-            [
-                RepositoryInterface::PROPERTY_ITEMS => $items,
-                RepositoryInterface::PROPERTY_TOTAL_ITEMS => $rowCount,
-                RepositoryInterface::PROPERTY_LIMIT => $this->limitRows,
-                RepositoryInterface::PROPERTY_FIRST_PAGE => 1,
-                RepositoryInterface::PROPERTY_PREVIOUS_PAGE => $previous,
-                RepositoryInterface::PROPERTY_CURRENT_PAGE => $numberPage,
-                RepositoryInterface::PROPERTY_NEXT_PAGE => $next,
-                RepositoryInterface::PROPERTY_LAST_PAGE => $totalPages,
-            ]
-        );
+        $page = new \stdClass();
+        $page->items = $items;
+        $page->first = 1;
+        $page->before = $before;
+        $page->current = $numberPage;
+        $page->last = $totalPages;
+        $page->next = $next;
+        $page->total_pages = $totalPages;
+        $page->total_items = $rowCount;
+        $page->limit = $this->limitRows;
+
+        return $page;
     }
 }
